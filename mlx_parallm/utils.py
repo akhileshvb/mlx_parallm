@@ -14,18 +14,18 @@ from typing import Any, Callable, Dict, Generator, List, Optional, Tuple, Union
 import mlx.core as mx
 import mlx.nn as nn
 from huggingface_hub import snapshot_download
-from huggingface_hub.utils._errors import RepositoryNotFoundError
+# from huggingface_hub.utils._errors import RepositoryNotFoundError
 from mlx.utils import tree_flatten
 from transformers import PreTrainedTokenizer
 
 # mlx_lm
 from mlx_lm.tokenizer_utils import TokenizerWrapper, load_tokenizer
-from mlx_lm.tuner.utils import apply_lora_layers
+# from mlx_lm.tuner.utils import apply_lora_layers
 from mlx_lm.tuner.utils import dequantize as dequantize_model
 
 # Local imports
-from mlx_parallm.sample_utils import top_p_sampling
-from mlx_parallm.models.base import BatchedKVCache
+from .sample_utils import top_p_sampling
+from .models.base import BatchedKVCache
 
 # Constants
 MODEL_REMAPPING = {
@@ -55,8 +55,9 @@ def _get_classes(config: dict):
     #return Model, ModelArgs
     model_type = config["model_type"]
     model_type = MODEL_REMAPPING.get(model_type, model_type)
+    print(model_type)
     try:
-        arch = importlib.import_module(f"mlx_parallm.models.{model_type}")
+        arch = importlib.import_module(f".models.{model_type}", package=__package__)
     except ImportError:
         msg = f"Model type {model_type} not supported."
         logging.error(msg)
@@ -79,29 +80,29 @@ def get_model_path(path_or_hf_repo: str, revision: Optional[str] = None) -> Path
     """
     model_path = Path(path_or_hf_repo)
     if not model_path.exists():
-        try:
-            model_path = Path(
-                snapshot_download(
-                    repo_id=path_or_hf_repo,
-                    revision=revision,
-                    allow_patterns=[
-                        "*.json",
-                        "*.safetensors",
-                        "*.py",
-                        "tokenizer.model",
-                        "*.tiktoken",
-                        "*.txt",
-                    ],
-                )
+        # try:
+        model_path = Path(
+            snapshot_download(
+                repo_id=path_or_hf_repo,
+                revision=revision,
+                allow_patterns=[
+                    "*.json",
+                    "*.safetensors",
+                    "*.py",
+                    "tokenizer.model",
+                    "*.tiktoken",
+                    "*.txt",
+                ],
             )
-        except RepositoryNotFoundError:
-            raise ModelNotFoundError(
-                f"Model not found for path or HF repo: {path_or_hf_repo}.\n"
-                "Please make sure you specified the local path or Hugging Face"
-                " repo id correctly.\nIf you are trying to access a private or"
-                " gated Hugging Face repo, make sure you are authenticated:\n"
-                "https://huggingface.co/docs/huggingface_hub/en/guides/cli#huggingface-cli-login"
-            ) from None
+        )
+        # except RepositoryNotFoundError:
+        #     raise ModelNotFoundError(
+        #         f"Model not found for path or HF repo: {path_or_hf_repo}.\n"
+        #         "Please make sure you specified the local path or Hugging Face"
+        #         " repo id correctly.\nIf you are trying to access a private or"
+        #         " gated Hugging Face repo, make sure you are authenticated:\n"
+        #         "https://huggingface.co/docs/huggingface_hub/en/guides/cli#huggingface-cli-login"
+        #     ) from None
     return model_path
 
 
@@ -532,9 +533,9 @@ def load(
     model_path = get_model_path(path_or_hf_repo)
 
     model = load_model(model_path, lazy, model_config)
-    if adapter_path is not None:
-        model = apply_lora_layers(model, adapter_path)
-        model.eval()
+    # if adapter_path is not None:
+    #     model = apply_lora_layers(model, adapter_path)
+    #     model.eval()
     tokenizer = load_tokenizer(model_path, tokenizer_config)
 
     return model, tokenizer
