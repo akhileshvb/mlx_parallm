@@ -14,13 +14,11 @@ from typing import Any, Callable, Dict, Generator, List, Optional, Tuple, Union
 import mlx.core as mx
 import mlx.nn as nn
 from huggingface_hub import snapshot_download
-# from huggingface_hub.utils._errors import RepositoryNotFoundError
 from mlx.utils import tree_flatten
 from transformers import PreTrainedTokenizer
 
 # mlx_lm
 from mlx_lm.tokenizer_utils import TokenizerWrapper, load_tokenizer
-# from mlx_lm.tuner.utils import apply_lora_layers
 from mlx_lm.tuner.utils import dequantize as dequantize_model
 
 # Local imports
