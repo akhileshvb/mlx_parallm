@@ -376,7 +376,7 @@ def generate(
     if verbose:
         print("=" * 10)
         print("Prompt:", prompt)
-    prompt_tokens = mx.array(tokenizer.encode(prompt))[None]
+    prompt_tokens = mx.array(prompt)[None]
     detokenizer = tokenizer.detokenizer
 
     tic = time.perf_counter()
