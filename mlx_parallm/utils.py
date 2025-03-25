@@ -361,7 +361,7 @@ def generate(
     Args:
        model (nn.Module): The language model.
        tokenizer (PreTrainedTokenizer): The tokenizer.
-       prompt (str): The string prompt.
+       prompt (list): List of tokenized input.
        max_tokens (int): The maximum number of tokens. Default: ``100``.
        verbose (bool): If ``True``, print tokens and timing information.
            Default: ``False``.
@@ -370,6 +370,39 @@ def generate(
        kwargs: The remaining options get passed to :func:`generate_step`.
           See :func:`generate_step` for more details.
     """
+    if isinstance(prompt, list) and prompt and all(isinstance(item, list) for item in prompt):
+        responses = []
+        for single_prompt in prompt:
+            response = generate_helper(
+                model=model,
+                tokenizer=tokenizer,
+                prompt=single_prompt,
+                max_tokens=max_tokens,
+                verbose=verbose,
+                formatter=formatter,
+                **kwargs,
+            )
+            responses.append(response)
+        return responses
+    else:
+        return generate_helper(
+            model=model,
+            tokenizer=tokenizer,
+            prompt=prompt,
+            max_tokens=max_tokens,
+            verbose=verbose,
+            formatter=formatter,
+            **kwargs,
+        ) 
+
+def generate_helper(model: nn.Module,
+    tokenizer: Union[PreTrainedTokenizer, TokenizerWrapper],
+    prompt: str,
+    max_tokens: int = 100,
+    verbose: bool = False,
+    formatter: Optional[Callable] = None,
+    **kwargs,
+) -> Union[str, Generator[str, None, None]]:
     if not isinstance(tokenizer, TokenizerWrapper):
         tokenizer = TokenizerWrapper(tokenizer)
 
