@@ -276,7 +276,7 @@ def stream_generate(
 def batch_generate(
     model: nn.Module,
     tokenizer: Union[PreTrainedTokenizer, TokenizerWrapper],
-    prompts: List[str],
+    prompts,
     max_tokens: int = 100,
     verbose: bool = False,
     format_prompts: bool = True,
