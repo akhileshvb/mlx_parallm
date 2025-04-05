@@ -316,10 +316,19 @@ def batch_generate(
         tokenizer._tokenizer.pad_token = tokenizer.eos_token
         tokenizer._tokenizer.pad_token_id = tokenizer.eos_token_id
 
+    def pad_prompts(prompts_fm, pad_token_id):
+        max_len = max(len(tokens) for tokens in prompts_fm)
+        return [
+            [pad_token_id] * (max_len - len(tokens)) + tokens
+            for tokens in prompts_fm
+        ]
+
     if format_prompts:
         prompts_toks = mx.array(tokenizer._tokenizer(prompts_fm, padding=True)['input_ids'])
     else:
-        prompts_toks = prompts_fm
+        pad_token_id = tokenizer.pad_token_id if tokenizer.pad_token_id is not None else tokenizer.eos_token_id
+        padded_prompts = pad_prompts(prompts_fm, pad_token_id)
+        prompts_toks = mx.array(padded_prompts)     
     #
     tic = time.perf_counter()
 
